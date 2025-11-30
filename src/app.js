@@ -3,14 +3,25 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
+const swaggerSpec = require('./config/swagger');
 const routes = require('./routes');
 const { errorHandler, notFound } = require('./middlewares/error');
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Security middleware - Configuration spéciale pour Swagger UI
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 
 // CORS configuration
 app.use(cors({
@@ -45,6 +56,12 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Event App Pro API Documentation',
+}));
+
 // Mount routes
 app.use(`/api/${config.apiVersion}`, routes);
 
@@ -53,7 +70,8 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Event App Pro API',
     version: config.apiVersion,
-    documentation: '/api/v1/health',
+    documentation: '/api-docs',
+    health: '/api/v1/health',
   });
 });
 

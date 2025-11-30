@@ -7,7 +7,30 @@ const organizerRoutes = require('./organizerRoutes');
 
 const router = express.Router();
 
-// Health check
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check de l'API
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: API opérationnelle
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: Event App Pro API is running
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',

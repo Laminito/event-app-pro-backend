@@ -122,12 +122,15 @@ Le serveur démarre sur `http://localhost:5000` 🎉
 curl http://localhost:5000/api/v1/health
 ```
 
-### Test 2: Liste des événements
+### Test 2: Documentation Swagger
+Ouvrez votre navigateur : `http://localhost:5000/api-docs`
+
+### Test 3: Liste des événements
 ```bash
 curl http://localhost:5000/api/v1/events
 ```
 
-### Test 3: Connexion avec un compte de test
+### Test 4: Connexion avec un compte de test
 ```powershell
 curl -X POST http://localhost:5000/api/v1/auth/login `
   -H "Content-Type: application/json" `
@@ -151,10 +154,19 @@ Après le seed, utilisez ces comptes :
 
 ## 📚 Documentation
 
-1. **SETUP.md** - Guide de démarrage rapide ⭐
-2. **README_BACKEND.md** - Documentation technique complète
-3. **API_ENDPOINTS.md** - Tous les endpoints API
-4. **REQUESTS_EXAMPLES.md** - Exemples de requêtes curl/Postman
+1. **SWAGGER.md** - Documentation Swagger UI ⭐ 🆕
+2. **SETUP.md** - Guide de démarrage rapide ⭐
+3. **README_BACKEND.md** - Documentation technique complète
+4. **API_ENDPOINTS.md** - Tous les endpoints API
+5. **REQUESTS_EXAMPLES.md** - Exemples de requêtes curl/Postman
+
+### 🌐 Documentation Interactive
+
+**Swagger UI** : `http://localhost:5000/api-docs`
+- Testez tous les endpoints directement
+- Authentification intégrée
+- Schémas de données
+- Exemples de réponses
 
 ---
 
@@ -279,6 +291,7 @@ Vous avez maintenant :
 ✅ Authentification JWT sécurisée  
 ✅ 5 modèles de données Mongoose  
 ✅ 50+ endpoints API RESTful  
+✅ **Documentation Swagger interactive** 📚  
 ✅ Gestion complète des billets avec QR Code  
 ✅ Dashboard organisateur  
 ✅ Système de paiement (structure prête)  
