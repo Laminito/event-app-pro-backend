@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Event = require('../models/Event');
 const AppError = require('../utils/AppError');
+const path = require('path');
+const fs = require('fs').promises;
 
 // @desc    Obtenir le profil utilisateur
 // @route   GET /api/v1/users/profile
@@ -52,6 +54,10 @@ exports.updatePassword = async (req, res, next) => {
       throw new AppError('Veuillez fournir le mot de passe actuel et le nouveau', 400, 'MISSING_PASSWORDS');
     }
     
+    if (newPassword.length < 6) {
+      throw new AppError('Le nouveau mot de passe doit contenir au moins 6 caractères', 400, 'PASSWORD_TOO_SHORT');
+    }
+    
     const user = await User.findById(req.user._id).select('+password');
     
     // Vérifier le mot de passe actuel
@@ -67,6 +73,81 @@ exports.updatePassword = async (req, res, next) => {
     
     res.status(200).json({
       message: 'Mot de passe mis à jour avec succès',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload avatar
+// @route   POST /api/v1/users/avatar
+// @access  Private
+exports.uploadAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      throw new AppError('Veuillez fournir une image', 400, 'NO_FILE');
+    }
+
+    const user = await User.findById(req.user._id);
+
+    // Supprimer l'ancien avatar si existe
+    if (user.avatar) {
+      const oldAvatarPath = path.join(__dirname, '../../', user.avatar);
+      try {
+        await fs.unlink(oldAvatarPath);
+      } catch (err) {
+        console.error('Erreur suppression ancien avatar:', err);
+      }
+    }
+
+    // Mettre à jour avec le nouveau chemin
+    const avatarPath = `/uploads/avatars/${req.file.filename}`;
+    user.avatar = avatarPath;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Avatar mis à jour avec succès',
+      avatar: avatarPath
+    });
+  } catch (error) {
+    // Supprimer le fichier uploadé en cas d'erreur
+    if (req.file) {
+      const filePath = path.join(__dirname, '../../uploads/avatars', req.file.filename);
+      try {
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.error('Erreur suppression fichier:', err);
+      }
+    }
+    next(error);
+  }
+};
+
+// @desc    Supprimer avatar
+// @route   DELETE /api/v1/users/avatar
+// @access  Private
+exports.deleteAvatar = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user.avatar) {
+      throw new AppError('Aucun avatar à supprimer', 404, 'NO_AVATAR');
+    }
+
+    // Supprimer le fichier
+    const avatarPath = path.join(__dirname, '../../', user.avatar);
+    try {
+      await fs.unlink(avatarPath);
+    } catch (err) {
+      console.error('Erreur suppression avatar:', err);
+    }
+
+    // Supprimer de la DB
+    user.avatar = null;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Avatar supprimé avec succès'
     });
   } catch (error) {
     next(error);

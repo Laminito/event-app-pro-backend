@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 const config = require('./config');
 const swaggerSpec = require('./config/swagger');
 const routes = require('./routes');
@@ -23,9 +24,8 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
 app.use(cors({
-  origin: config.cors.origin,
+  origin: 'http://localhost:5173', // URL exacte du front
   credentials: true,
 }));
 
@@ -60,6 +60,16 @@ app.use('/api', limiter);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Event App Pro API Documentation',
+}));
+
+// Servir les fichiers statiques (uploads) - AVANT les routes API
+// CORS headers et Cross-Origin-Resource-Policy pour les fichiers statiques
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', config.cors.origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
 }));
 
 // Mount routes

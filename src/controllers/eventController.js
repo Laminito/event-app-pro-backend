@@ -1,6 +1,69 @@
+// @desc    Créer un nouvel événement
+// @route   POST /api/v1/events
+// @access  Private (organizer/admin)
+exports.createEvent = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      category,
+      date,
+      time,
+      location,
+      image,
+      organizer,
+      tickets,
+      capacity,
+      featured,
+      tags,
+      published,
+    } = req.body;
+
+    // Validation minimale
+    if (!title || !description || !category || !date || !time || !location || !organizer || !capacity) {
+      return res.status(400).json({ error: 'Champs obligatoires manquants.' });
+    }
+
+    const event = await Event.create({
+      title,
+      description,
+      category,
+      date,
+      time,
+      location,
+      image,
+      organizer,
+      tickets,
+      capacity,
+      featured,
+      tags,
+      published,
+    });
+
+    res.status(201).json(event);
+  } catch (error) {
+    next(error);
+  }
+};
 const Event = require('../models/Event');
 const { paginate, paginatedResponse, cleanObject } = require('../utils/helpers');
 const AppError = require('../utils/AppError');
+
+// @desc    Upload event image
+// @route   POST /api/v1/events/upload-image
+// @access  Private (organizer/admin)
+exports.uploadEventImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Aucune image envoyée.' });
+    }
+    // Return the path or URL of the uploaded image
+    const imageUrl = `/uploads/events/${req.file.filename}`;
+    res.status(200).json({ imageUrl });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Obtenir tous les événements (avec filtres et pagination)
 // @route   GET /api/v1/events

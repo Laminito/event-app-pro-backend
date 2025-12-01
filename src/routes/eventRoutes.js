@@ -1,13 +1,68 @@
 const express = require('express');
+const router = express.Router();
 const {
   getEvents,
   getEventById,
   getFeaturedEvents,
   getCategories,
   getSearchSuggestions,
+  createEvent,
+  uploadEventImage,
 } = require('../controllers/eventController');
+const { uploadEventImage: uploadImageMiddleware } = require('../utils/upload');
+/**
+ * @swagger
+ * /events/upload-image:
+ *   post:
+ *     summary: Upload d'une image d'événement
+ *     tags: [Événements]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: URL de l'image uploadée
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ */
 
-const router = express.Router();
+router.post('/upload-image', uploadImageMiddleware.single('image'), uploadEventImage);
+
+/**
+ * @swagger
+ * /events:
+ *   post:
+ *     summary: Créer un nouvel événement
+ *     tags: [Événements]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Event'
+ *     responses:
+ *       201:
+ *         description: Événement créé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
+ *       400:
+ *         description: Données invalides
+ */
+router.post('/', createEvent);
 
 /**
  * @swagger

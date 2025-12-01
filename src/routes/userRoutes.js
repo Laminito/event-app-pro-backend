@@ -5,11 +5,14 @@ const {
   getProfile,
   updateProfile,
   updatePassword,
+  uploadAvatar: uploadAvatarController,
+  deleteAvatar,
   getFavorites,
   addToFavorites,
   removeFromFavorites,
 } = require('../controllers/userController');
 const { protect } = require('../middlewares/auth');
+const { uploadAvatar: avatarUploadMiddleware, uploadEventImage } = require('../utils/upload');
 
 const router = express.Router();
 
@@ -112,6 +115,63 @@ router.put('/profile', updateProfileValidation, validate, updateProfile);
  *         description: Mot de passe actuel incorrect
  */
 router.put('/password', updatePasswordValidation, validate, updatePassword);
+
+/**
+ * @swagger
+ * /users/avatar:
+ *   post:
+ *     summary: Upload avatar
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image de l'avatar (jpeg, jpg, png, gif, webp - max 5MB)
+ *     responses:
+ *       200:
+ *         description: Avatar uploadé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 avatar:
+ *                   type: string
+ *                   description: Chemin de l'avatar
+ *       400:
+ *         description: Fichier manquant ou type invalide
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.post('/avatar', avatarUploadMiddleware.single('avatar'), uploadAvatarController);
+
+/**
+ * @swagger
+ * /users/avatar:
+ *   delete:
+ *     summary: Supprimer l'avatar
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Avatar supprimé
+ *       404:
+ *         description: Aucun avatar à supprimer
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.delete('/avatar', deleteAvatar);
 
 /**
  * @swagger
